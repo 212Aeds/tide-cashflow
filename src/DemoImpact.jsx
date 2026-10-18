@@ -40,7 +40,7 @@ function ScenarioChart({ onTimePoints, latePoints, buffer, delayed }) {
   const line = points => points.map((point, index) => `${index ? 'L' : 'M'} ${x(index).toFixed(1)} ${y(point.balance).toFixed(1)}`).join(' ')
 
   return <figure className="scenario-chart" aria-label="Six-week cash forecast comparison">
-    <div className="scenario-chart-caption"><figcaption>How the six-week cash forecast changes</figcaption><div className="scenario-chart-legend"><span><i className="scenario-line-on-time" /> On time</span><span><i className="scenario-line-late" /> Two weeks late</span><span><i className="scenario-line-safety" /> Safety amount</span></div></div>
+    <figcaption className="scenario-chart-caption"><span>How the six-week cash forecast changes</span><span className="scenario-chart-legend"><span><i className="scenario-line-on-time" /> On time</span><span><i className="scenario-line-late" /> Two weeks late</span><span><i className="scenario-line-safety" /> Safety amount</span></span></figcaption>
     <svg viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none" role="img" aria-label={delayed ? `On-time lowest cash ${money(Math.min(...onTimePoints.map(point => point.balance)))}; delayed lowest cash ${money(Math.min(...latePoints.map(point => point.balance)))}` : 'On-time cash forecast. Delay the invoice to reveal the updated forecast.'}>
       <line x1={left} x2={width-right} y1={y(buffer)} y2={y(buffer)} className="scenario-safety" />
       <path d={line(onTimePoints)} className="scenario-on-time" />
