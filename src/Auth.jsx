@@ -1,9 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { createUserWithEmailAndPassword, GoogleAuthProvider, onAuthStateChanged, sendPasswordResetEmail, signInWithEmailAndPassword, signInWithPopup, signOut } from 'firebase/auth'
 import { doc, getDoc, serverTimestamp, setDoc } from 'firebase/firestore'
-import { ArrowRight, LockKeyhole, Mail, ShieldCheck } from 'lucide-react'
+import { ArrowRight, Eye, EyeOff, LockKeyhole, Mail, ShieldCheck } from 'lucide-react'
 import App from './App.jsx'
 import { seed } from './plan.js'
+import { readPlanCache, selectPlan, writePlanCache } from './planStorage.js'
 import { auth, configured, db } from './firebase.js'
 
 function messageFor(error) {
@@ -26,6 +27,7 @@ function SignIn() {
   const [mode, setMode] = useState('signin')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
   const [busy, setBusy] = useState(false)
   const [notice, setNotice] = useState('')
 
@@ -55,7 +57,7 @@ function SignIn() {
     try {
       await signInWithPopup(auth, new GoogleAuthProvider())
     } catch (error) {
-      setNotice(messageFor(error))
+      if (error?.code !== 'auth/cancelled-popup-request') setNotice(messageFor(error))
     } finally {
       setBusy(false)
     }
@@ -69,12 +71,12 @@ function SignIn() {
     <p>{mode === 'signup' ? 'Save your money plan and return to it any time.' : mode === 'reset' ? 'Enter your email and we’ll send you a reset link.' : 'Sign in to see your client payments, bills, and cash forecast.'}</p>
     <form onSubmit={submit}>
       <label>Email address<div className="auth-input"><Mail size={17}/><input type="email" value={email} onChange={e=>setEmail(e.target.value)} autoComplete="email" placeholder="you@business.com" required/></div></label>
-      {mode !== 'reset' && <label>Password<div className="auth-input"><LockKeyhole size={17}/><input type="password" minLength={mode === 'signup' ? 6 : undefined} value={password} onChange={e=>setPassword(e.target.value)} autoComplete={mode === 'signup' ? 'new-password' : 'current-password'} placeholder="Your password" required/></div></label>}
+      {mode !== 'reset' && <label>Password<div className="auth-input"><LockKeyhole size={17}/><input type={showPassword ? 'text' : 'password'} minLength={mode === 'signup' ? 6 : undefined} value={password} onChange={e=>setPassword(e.target.value)} autoComplete={mode === 'signup' ? 'new-password' : 'current-password'} placeholder="Your password" required/><button className="password-toggle" type="button" onClick={()=>setShowPassword(value=>!value)} aria-label={showPassword ? 'Hide password' : 'Show password'}>{showPassword ? <EyeOff size={18}/> : <Eye size={18}/>}</button></div></label>}
       {notice && <div className="auth-notice" role="status">{notice}</div>}
       <button className="primary-button auth-submit" disabled={busy}>{busy ? 'Please wait…' : mode === 'signup' ? 'Create account' : mode === 'reset' ? 'Send reset link' : 'Sign in'} <ArrowRight size={17}/></button>
     </form>
     {mode !== 'reset' && <><div className="auth-divider"><span>or</span></div><button type="button" className="google-button" onClick={googleSignIn} disabled={busy}><span className="google-g" aria-hidden="true">G</span> Continue with Google</button></>}
-    <div className="auth-links">{mode !== 'reset' && <button type="button" onClick={()=>{setMode(mode === 'signup' ? 'signin' : 'signup');setNotice('')}}>{mode === 'signup' ? 'Already have an account? Sign in' : 'New here? Create an account'}</button>}<button type="button" onClick={()=>{setMode(mode === 'reset' ? 'signin' : 'reset');setNotice('')}}>{mode === 'reset' ? 'Back to sign in' : 'Forgot password?'}</button></div>
+    <div className="auth-links">{mode !== 'reset' && <button type="button" disabled={busy} onClick={()=>{setMode(mode === 'signup' ? 'signin' : 'signup');setNotice('')}}>{mode === 'signup' ? 'Already have an account? Sign in' : 'New here? Create an account'}</button>}<button type="button" disabled={busy} onClick={()=>{setMode(mode === 'reset' ? 'signin' : 'reset');setNotice('')}}>{mode === 'reset' ? 'Back to sign in' : 'Forgot password?'}</button></div>
     <div className="auth-foot"><ShieldCheck size={16}/> Changes to your plan save automatically.</div>
   </div></div>
 }
@@ -82,6 +84,7 @@ function SignIn() {
 export default function AuthGate() {
   const [user, setUser] = useState(null)
   const [authReady, setAuthReady] = useState(false)
+  const [authError, setAuthError] = useState('')
   const [plan, setPlan] = useState(null)
   const [saveState, setSaveState] = useState('Saved')
   const [loadError, setLoadError] = useState('')
@@ -97,30 +100,29 @@ export default function AuthGate() {
       setPlan(null)
       planRef.current = null
       setRevision(0)
+      setAuthError('')
       setAuthReady(true)
-    })
+    }, error => { setAuthError(messageFor(error)); setAuthReady(true) })
   }, [])
 
   useEffect(() => {
     if (!user) return
     let cancelled = false
-    const cacheKey = `tide-plan-${user.uid}`
+    const cached = readPlanCache(localStorage, user.uid)
     getDoc(doc(db, 'users', user.uid)).then(snapshot => {
       if (cancelled) return
-      const saved = snapshot.data()?.plan
-      const nextPlan = saved && Array.isArray(saved.invoices) && Array.isArray(saved.weeklyBills) ? saved : seed
+      const { plan: nextPlan, shouldSave } = selectPlan(snapshot.data()?.plan, cached)
       planRef.current = nextPlan
       setPlan(nextPlan)
-      setSaveState('Saved')
+      setSaveState(shouldSave ? 'Saving…' : snapshot.exists() ? 'Saved to your account' : 'Sample plan ready')
       setLoadError('')
-      localStorage.setItem(cacheKey, JSON.stringify(nextPlan))
+      writePlanCache(localStorage, user.uid, nextPlan, shouldSave)
+      if (shouldSave) setRevision(value => value + 1)
     }).catch(error => {
       if (cancelled) return
-      let cached = null
-      try { cached = JSON.parse(localStorage.getItem(cacheKey)) } catch { /* no local copy */ }
-      if (cached && Array.isArray(cached.invoices) && Array.isArray(cached.weeklyBills)) {
-        planRef.current = cached
-        setPlan(cached)
+      if (cached) {
+        planRef.current = cached.plan
+        setPlan(cached.plan)
         setLoadError(`${messageFor(error)} Changes will stay on this device until online saving works.`)
         setSaveState('Saved on this device')
       } else {
@@ -136,17 +138,27 @@ export default function AuthGate() {
   useEffect(() => {
     if (!user || !plan || !revision) return
     clearTimeout(saveTimer.current)
-    const cacheKey = `tide-plan-${user.uid}`
-    localStorage.setItem(cacheKey, JSON.stringify(plan))
+    writePlanCache(localStorage, user.uid, plan, true)
     setSaveState('Saving…')
     saveTimer.current = setTimeout(async () => {
+      const savingPlan = planRef.current
+      const slowTimer = setTimeout(() => {
+        if (auth.currentUser?.uid === user.uid && planRef.current === savingPlan) setSaveState('Saved on this device')
+      }, 5000)
       try {
-        await setDoc(doc(db, 'users', user.uid), { plan: planRef.current, updatedAt: serverTimestamp() })
-        setSaveState('Saved to your account')
-        setLoadError('')
+        await setDoc(doc(db, 'users', user.uid), { plan: savingPlan, updatedAt: serverTimestamp() })
+        if (auth.currentUser?.uid === user.uid && planRef.current === savingPlan) {
+          writePlanCache(localStorage, user.uid, savingPlan, false)
+          setSaveState('Saved to your account')
+          setLoadError('')
+        }
       } catch (error) {
-        setSaveState('Saved on this device')
-        setLoadError(`${messageFor(error)} Changes are saved on this device.`)
+        if (auth.currentUser?.uid === user.uid && planRef.current === savingPlan) {
+          setSaveState('Saved on this device')
+          setLoadError(`${messageFor(error)} Changes are saved on this device.`)
+        }
+      } finally {
+        clearTimeout(slowTimer)
       }
     }, 500)
     return () => clearTimeout(saveTimer.current)
@@ -155,21 +167,20 @@ export default function AuthGate() {
   function updatePlan(updater) {
     const next = typeof updater === 'function' ? updater(planRef.current) : updater
     planRef.current = next
+    writePlanCache(localStorage, user.uid, next, true)
     setPlan(next)
     setRevision(value => value + 1)
   }
 
   async function handleSignOut() {
     clearTimeout(saveTimer.current)
-    if (revision && planRef.current) {
-      try { await setDoc(doc(db, 'users', user.uid), { plan: planRef.current, updatedAt: serverTimestamp() }) }
-      catch { /* local copy remains under this account */ }
-    }
-    await signOut(auth)
+    try { await signOut(auth) }
+    catch (error) { setLoadError(messageFor(error)) }
   }
 
   if (!configured) return <div className="auth-page"><div className="auth-card"><div className="auth-brand"><div className="brand-mark"><span/></div><span>tide<span className="brand-period">.</span></span></div><h1>Account setup needed</h1><p>Firebase configuration is missing. Add the four VITE_FIREBASE values in .env.local and rebuild the website.</p></div></div>
   if (!authReady) return <div className="auth-page"><div className="auth-card"><h1>Opening Tide…</h1></div></div>
+  if (authError) return <div className="auth-page"><div className="auth-card"><h1>Sign-in is unavailable</h1><p>{authError}</p><button className="outline-button" onClick={()=>window.location.reload()}>Try again</button></div></div>
   if (!user) return <SignIn/>
   if (!plan) return <div className="auth-page"><div className="auth-card"><h1>Opening your money plan…</h1>{loadError && <div className="auth-notice" role="alert">{loadError}</div>}<button className="outline-button" onClick={handleSignOut}>Sign out</button></div></div>
   return <>{loadError && <div className="sync-banner" role="alert">{loadError}</div>}<App plan={plan} setPlan={updatePlan} user={user} onSignOut={handleSignOut} saveState={saveState}/></>

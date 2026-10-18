@@ -28,6 +28,7 @@
 .auth-input:focus-within{outline:3px solid #bd785266;outline-offset:1px}
 .auth-input input{border:0;outline:0;background:transparent;color:#463426;padding:13px 0;width:100%;font:500 14px 'DM Sans',sans-serif}
 .auth-input input:focus-visible{outline:0}
+.password-toggle{display:grid;place-items:center;flex:none;border:0;background:transparent;color:#8d6d56;padding:6px;cursor:pointer}.password-toggle:hover{color:#995235}
 .auth-submit{display:flex;justify-content:center;align-items:center;width:100%;margin-top:7px;min-height:46px;gap:8px}
 .auth-submit:disabled{opacity:.65;cursor:wait}
 .auth-divider{display:flex;align-items:center;gap:12px;color:#9a806a;font-size:11px;margin:20px 0}.auth-divider:before,.auth-divider:after{content:'';height:1px;background:#e8d8c1;flex:1}
