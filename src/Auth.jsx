@@ -3,6 +3,7 @@ import { createUserWithEmailAndPassword, GoogleAuthProvider, onAuthStateChanged,
 import { doc, getDoc, serverTimestamp, setDoc } from 'firebase/firestore'
 import { ArrowRight, Eye, EyeOff, LockKeyhole, Mail, ShieldCheck } from 'lucide-react'
 import App from './App.jsx'
+import Landing from './Landing.jsx'
 import { seed } from './plan.js'
 import { readPlanCache, selectPlan, writePlanCache } from './planStorage.js'
 import { auth, configured, db } from './firebase.js'
@@ -23,8 +24,8 @@ function messageFor(error) {
   return error?.message || 'Something went wrong. Please try again.'
 }
 
-function SignIn() {
-  const [mode, setMode] = useState('signin')
+function SignIn({ initialMode = 'signin', onBack }) {
+  const [mode, setMode] = useState(initialMode)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
@@ -64,6 +65,7 @@ function SignIn() {
   }
 
   return <div className="auth-page"><div className="auth-card">
+    <button type="button" className="auth-back" onClick={onBack}>← Back to overview</button>
     <div className="auth-brand"><div className="brand-mark"><span /></div><span>tide<span className="brand-period">.</span></span></div>
     <div className="auth-icon"><LockKeyhole size={23}/></div>
     <div className="section-kicker">YOUR MONEY, MADE CLEAR</div>
@@ -83,6 +85,7 @@ function SignIn() {
 
 export default function AuthGate() {
   const [user, setUser] = useState(null)
+  const [authView, setAuthView] = useState(null)
   const [authReady, setAuthReady] = useState(false)
   const [authError, setAuthError] = useState('')
   const [plan, setPlan] = useState(null)
@@ -181,7 +184,7 @@ export default function AuthGate() {
   if (!configured) return <div className="auth-page"><div className="auth-card"><div className="auth-brand"><div className="brand-mark"><span/></div><span>tide<span className="brand-period">.</span></span></div><h1>Account setup needed</h1><p>Firebase configuration is missing. Add the four VITE_FIREBASE values in .env.local and rebuild the website.</p></div></div>
   if (!authReady) return <div className="auth-page"><div className="auth-card"><h1>Opening Tide…</h1></div></div>
   if (authError) return <div className="auth-page"><div className="auth-card"><h1>Sign-in is unavailable</h1><p>{authError}</p><button className="outline-button" onClick={()=>window.location.reload()}>Try again</button></div></div>
-  if (!user) return <SignIn/>
+  if (!user) return authView ? <SignIn key={authView} initialMode={authView} onBack={() => setAuthView(null)}/> : <Landing onGetStarted={() => setAuthView('signup')} onSignIn={() => setAuthView('signin')}/>
   if (!plan) return <div className="auth-page"><div className="auth-card"><h1>Opening your money plan…</h1>{loadError && <div className="auth-notice" role="alert">{loadError}</div>}<button className="outline-button" onClick={handleSignOut}>Sign out</button></div></div>
   return <>{loadError && <div className="sync-banner" role="alert">{loadError}</div>}<App plan={plan} setPlan={updatePlan} user={user} onSignOut={handleSignOut} saveState={saveState}/></>
 }
