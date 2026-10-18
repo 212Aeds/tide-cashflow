@@ -12,10 +12,10 @@ describe('public welcome page', () => {
     const onTryDemo = vi.fn()
     render(<Landing onGetStarted={vi.fn()} onSignIn={vi.fn()} onTryDemo={onTryDemo} />)
     expect(screen.getByRole('heading', { name: /Know if you can cover your bills/i })).toBeTruthy()
-    expect(screen.getByText('Handle late invoices')).toBeTruthy()
-    expect(screen.getByText('Decide whether to borrow')).toBeTruthy()
+    expect(screen.getByText('Track payments')).toBeTruthy()
+    expect(screen.getByText('Compare loan costs')).toBeTruthy()
     expect(screen.getByRole('list').querySelectorAll('li')).toHaveLength(4)
-    await userEvent.click(screen.getByRole('button', { name: /Try the live demo/i }))
+    await userEvent.click(screen.getAllByRole('button', { name: /Try Tide/i })[0])
     expect(onTryDemo).toHaveBeenCalledOnce()
   })
 

@@ -15,14 +15,14 @@ export default function DemoImpact({ plan, invoice, onToggleDelay, onOpenBorrowi
 
   return <section className={`demo-impact ${delayed ? 'demo-impact-active' : ''}`} aria-labelledby="demo-impact-title">
     <div className="demo-impact-heading">
-      <div><span className="demo-impact-kicker"><span className="demo-live-dot" /> ATLAS COMMERCE · SAMPLE INVOICE</span><h2 id="demo-impact-title">What if $6,200 arrives two weeks late?</h2><p>Move the Atlas payment and see which week gets tight. The borrowing check uses the same updated numbers.</p></div>
+      <div><span className="demo-impact-kicker"><span className="demo-live-dot" /> SAMPLE PAYMENT FROM ATLAS</span><h2 id="demo-impact-title">What if $6,200 arrives two weeks late?</h2><p>Move the payment to see which week gets tight. Then check if a loan would help.</p></div>
       <div className="demo-impact-control"><button type="button" className="demo-impact-primary" onClick={onToggleDelay}>{delayed ? <RotateCcw size={17}/> : <FileClock size={17}/>} {delayed ? 'Restore on-time payment' : 'Delay Atlas payment'}</button></div>
     </div>
     <div className="demo-impact-comparison" aria-live="polite">
       <div className="demo-impact-number"><span>IF PAID ON TIME</span><strong>{money(onTime.lowest)}</strong><small>Lowest cash after bills</small></div>
       <div className="demo-impact-arrow" aria-hidden="true"><ArrowRight size={22}/></div>
       <div className="demo-impact-number"><span>IF PAID LATE</span><strong className={delayed ? 'demo-impact-warn' : ''}>{delayed ? money(late.lowest) : '—'}</strong><small>{delayed ? 'Lowest cash after bills' : 'Click below to find out'}</small></div>
-      <div className="demo-impact-number demo-impact-gap"><span>GAP TO YOUR SAFETY AMOUNT</span><strong className={delayed ? 'demo-impact-warn' : ''}>{delayed ? money(late.bufferGap) : '—'}</strong><small>{delayed ? `To keep ${money(late.buffer)} aside` : 'Calculated from the forecast'}</small></div>
+      <div className="demo-impact-number demo-impact-gap"><span>BELOW WHAT YOU WANT TO KEEP</span><strong className={delayed ? 'demo-impact-warn' : ''}>{delayed ? money(late.bufferGap) : '—'}</strong><small>{delayed ? `To keep ${money(late.buffer)} aside` : 'Based on your money plan'}</small></div>
     </div>
     {delayed && <p className="demo-impact-explanation" role="status">At the tightest point, you would have {money(onTime.lowest - late.lowest)} less cash. {late.shortfall ? `That leaves ${money(late.shortfall)} of bills uncovered.` : late.bufferGap ? `You can still pay the bills, but you would be ${money(late.bufferGap)} below the amount you wanted to keep aside.` : 'Your bills and safety amount are still covered.'} Check the borrowing screen before deciding what to do.</p>}
     {delayed && <div className="demo-impact-actions"><button type="button" className="demo-impact-secondary" onClick={onOpenBorrowing}>See borrowing decision <ArrowRight size={16}/></button><button type="button" className="demo-impact-secondary" onClick={onWriteReminder}>Draft reminder <ArrowRight size={16}/></button></div>}
@@ -40,7 +40,7 @@ function ScenarioChart({ onTimePoints, latePoints, buffer, delayed }) {
   const line = points => points.map((point, index) => `${index ? 'L' : 'M'} ${x(index).toFixed(1)} ${y(point.balance).toFixed(1)}`).join(' ')
 
   return <figure className="scenario-chart" aria-label="Six-week cash forecast comparison">
-    <figcaption className="scenario-chart-caption"><span>How the six-week cash forecast changes</span><span className="scenario-chart-legend"><span><i className="scenario-line-on-time" /> On time</span><span><i className="scenario-line-late" /> Two weeks late</span><span><i className="scenario-line-safety" /> Safety amount</span></span></figcaption>
+    <figcaption className="scenario-chart-caption"><span>Money left after bills over six weeks</span><span className="scenario-chart-legend"><span><i className="scenario-line-on-time" /> On time</span><span><i className="scenario-line-late" /> Two weeks late</span><span><i className="scenario-line-safety" /> Amount to keep</span></span></figcaption>
     <svg viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none" role="img" aria-label={delayed ? `On-time lowest cash ${money(Math.min(...onTimePoints.map(point => point.balance)))}; delayed lowest cash ${money(Math.min(...latePoints.map(point => point.balance)))}` : 'On-time cash forecast. Delay the invoice to reveal the updated forecast.'}>
       <line x1={left} x2={width-right} y1={y(buffer)} y2={y(buffer)} className="scenario-safety" />
       <path d={line(onTimePoints)} className="scenario-on-time" />
