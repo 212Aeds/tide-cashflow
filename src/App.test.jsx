@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 import React, { useState } from 'react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { cleanup, render, screen, within } from '@testing-library/react'
+import { cleanup, fireEvent, render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import App from './App.jsx'
 import { seed } from './plan.js'
@@ -15,6 +15,18 @@ beforeEach(() => vi.stubGlobal('scrollTo', vi.fn()))
 afterEach(() => { cleanup(); vi.unstubAllGlobals() })
 
 describe('connected dashboard actions', () => {
+  it('lets a user move the six-week plan to a new start date', async () => {
+    const user = userEvent.setup()
+    render(<TestDashboard />)
+    await user.click(screen.getByRole('button', { name: 'Change dates' }))
+    fireEvent.change(screen.getByLabelText(/First week in this plan/), { target: { value: '2027-01-04' } })
+    expect(screen.getByLabelText('Bills week of Jan 11')).toBeTruthy()
+    await user.click(screen.getByRole('button', { name: 'Done' }))
+    expect(screen.getByText(/Planning from the week of Jan 4, 2027/)).toBeTruthy()
+    await user.click(screen.getByRole('button', { name: 'Client payments' }))
+    expect(screen.getByText('Week of Jan 11')).toBeTruthy()
+  })
+
   it('carries a delayed client payment through the forecast into borrowing', async () => {
     const user = userEvent.setup()
     render(<TestDashboard />)

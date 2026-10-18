@@ -1,7 +1,19 @@
 import { describe, expect, it } from 'vitest'
-import { blankPlan, calculateLoan, forecast, getPlanSummary, isBlankPlan, isSamplePlan, removeInvoice, seed, setInvoiceStatus, weeks } from './plan.js'
+import { blankPlan, calculateLoan, forecast, getPlanSummary, isBlankPlan, isSamplePlan, removeInvoice, seed, setInvoiceStatus, upcomingWeekStart, weeks, weeksForPlan } from './plan.js'
 
 describe('six-week money plan', () => {
+  it('starts new plans on the upcoming Monday and preserves old plan dates', () => {
+    expect(upcomingWeekStart(new Date(2026, 9, 17))).toBe('2026-10-19')
+    expect(upcomingWeekStart(new Date(2026, 9, 19))).toBe('2026-10-19')
+    expect(weeksForPlan({ startDate: '2026-12-28' })).toEqual(['Dec 28', 'Jan 4', 'Jan 11', 'Jan 18', 'Jan 25', 'Feb 1'])
+    expect(weeksForPlan({})).toEqual(['Oct 19', 'Oct 26', 'Nov 2', 'Nov 9', 'Nov 16', 'Nov 23'])
+  })
+
+  it('changes week labels without changing the amounts or balances', () => {
+    const shifted = { ...seed, startDate: '2027-01-04' }
+    expect(forecast(shifted)[0].label).toBe('Jan 4')
+    expect(forecast(shifted).map(point => point.balance)).toEqual(forecast(seed).map(point => point.balance))
+  })
   it('starts the sample with bills covered every week', () => {
     const points = forecast(seed)
     expect(points.map(point => point.balance)).toEqual([11700, 9900, 11700, 7800, 9300, 7700])

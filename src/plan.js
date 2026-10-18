@@ -1,6 +1,25 @@
-export const weeks = ['Oct 19', 'Oct 26', 'Nov 2', 'Nov 9', 'Nov 16', 'Nov 23']
+const legacyStartDate = '2026-10-19'
+
+export function upcomingWeekStart(date = new Date()) {
+  const day = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()))
+  day.setUTCDate(day.getUTCDate() + (8 - day.getUTCDay()) % 7)
+  return day.toISOString().slice(0, 10)
+}
+
+export function weeksForPlan(plan) {
+  const raw = plan.startDate || legacyStartDate
+  const start = new Date(`${raw}T00:00:00Z`)
+  const safeStart = !Number.isNaN(start.getTime()) && start.toISOString().slice(0, 10) === raw
+    ? start : new Date(`${legacyStartDate}T00:00:00Z`)
+  return Array.from({ length: 6 }, (_, index) => {
+    const date = new Date(safeStart)
+    date.setUTCDate(date.getUTCDate() + index * 7)
+    return new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' }).format(date)
+  })
+}
 
 export const seed = {
+  startDate: upcomingWeekStart(),
   opening: 8000,
   buffer: 5000,
   weeklyIncome: [2500, 2500, 2500, 2500, 2500, 2500],
@@ -15,6 +34,7 @@ export const seed = {
 }
 
 export const blankPlan = {
+  startDate: upcomingWeekStart(),
   opening: 0,
   buffer: 5000,
   weeklyIncome: [0, 0, 0, 0, 0, 0],
@@ -22,6 +42,8 @@ export const blankPlan = {
   extraBills: [],
   invoices: [],
 }
+
+export const weeks = weeksForPlan(seed)
 
 export function isBlankPlan(plan) {
   return Number(plan.opening) === 0 && plan.invoices.length === 0 &&
@@ -41,7 +63,7 @@ export function isSamplePlan(plan) {
 
 export function forecast(plan) {
   let balance = Number(plan.opening) || 0
-  return weeks.map((label, index) => {
+  return weeksForPlan(plan).map((label, index) => {
     const invoiceIncome = plan.invoices.reduce((sum, invoice) => {
       const arrival = invoice.status === 'paid' ? -1 : invoice.status === 'late' ? (invoice.lateWeek ?? Math.min(invoice.week + 2, 5)) : invoice.week
       return sum + (arrival === index ? Number(invoice.amount) : 0)
