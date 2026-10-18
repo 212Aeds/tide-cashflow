@@ -86,6 +86,7 @@ function SignIn({ initialMode = 'signin', onBack }) {
 export default function AuthGate() {
   const [user, setUser] = useState(null)
   const [authView, setAuthView] = useState(null)
+  const [demoPlan, setDemoPlan] = useState(() => new URLSearchParams(window.location.search).get('demo') === '1' ? structuredClone(seed) : null)
   const [authReady, setAuthReady] = useState(false)
   const [authError, setAuthError] = useState('')
   const [plan, setPlan] = useState(null)
@@ -94,6 +95,26 @@ export default function AuthGate() {
   const [revision, setRevision] = useState(0)
   const planRef = useRef(null)
   const saveTimer = useRef(null)
+
+  useEffect(() => {
+    const syncDemoWithUrl = () => setDemoPlan(new URLSearchParams(window.location.search).get('demo') === '1' ? structuredClone(seed) : null)
+    window.addEventListener('popstate', syncDemoWithUrl)
+    return () => window.removeEventListener('popstate', syncDemoWithUrl)
+  }, [])
+
+  function openDemo() {
+    const url = new URL(window.location.href)
+    url.searchParams.set('demo', '1')
+    window.history.pushState({}, '', url)
+    setDemoPlan(structuredClone(seed))
+  }
+
+  function closeDemo() {
+    const url = new URL(window.location.href)
+    url.searchParams.delete('demo')
+    window.history.replaceState({}, '', url)
+    setDemoPlan(null)
+  }
 
   useEffect(() => {
     if (!configured) return
@@ -181,10 +202,11 @@ export default function AuthGate() {
     catch (error) { setLoadError(messageFor(error)) }
   }
 
+  if (demoPlan) return <App plan={demoPlan} setPlan={setDemoPlan} user={{ email: 'Sample demo' }} onSignOut={closeDemo} saveState="Demo · not saved" isDemo/>
   if (!configured) return <div className="auth-page"><div className="auth-card"><div className="auth-brand"><div className="brand-mark"><span/></div><span>tide<span className="brand-period">.</span></span></div><h1>Account setup needed</h1><p>Firebase configuration is missing. Add the four VITE_FIREBASE values in .env.local and rebuild the website.</p></div></div>
   if (!authReady) return <div className="auth-page"><div className="auth-card"><h1>Opening Tide…</h1></div></div>
   if (authError) return <div className="auth-page"><div className="auth-card"><h1>Sign-in is unavailable</h1><p>{authError}</p><button className="outline-button" onClick={()=>window.location.reload()}>Try again</button></div></div>
-  if (!user) return authView ? <SignIn key={authView} initialMode={authView} onBack={() => setAuthView(null)}/> : <Landing onGetStarted={() => setAuthView('signup')} onSignIn={() => setAuthView('signin')}/>
+  if (!user) return authView ? <SignIn key={authView} initialMode={authView} onBack={() => setAuthView(null)}/> : <Landing onGetStarted={() => setAuthView('signup')} onSignIn={() => setAuthView('signin')} onTryDemo={openDemo}/>
   if (!plan) return <div className="auth-page"><div className="auth-card"><h1>Opening your money plan…</h1>{loadError && <div className="auth-notice" role="alert">{loadError}</div>}<button className="outline-button" onClick={handleSignOut}>Sign out</button></div></div>
   return <>{loadError && <div className="sync-banner" role="alert">{loadError}</div>}<App plan={plan} setPlan={updatePlan} user={user} onSignOut={handleSignOut} saveState={saveState}/></>
 }

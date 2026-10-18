@@ -8,20 +8,23 @@ import Landing from './Landing.jsx'
 afterEach(cleanup)
 
 describe('public welcome page', () => {
-  it('explains the connected money workflow and opens account creation', async () => {
-    const onGetStarted = vi.fn()
-    render(<Landing onGetStarted={onGetStarted} onSignIn={vi.fn()} />)
+  it('explains the connected money workflow and opens the live demo', async () => {
+    const onTryDemo = vi.fn()
+    render(<Landing onGetStarted={vi.fn()} onSignIn={vi.fn()} onTryDemo={onTryDemo} />)
     expect(screen.getByRole('heading', { name: /Know if you can cover your bills/i })).toBeTruthy()
     expect(screen.getByText('Handle late invoices')).toBeTruthy()
     expect(screen.getByText('Decide whether to borrow')).toBeTruthy()
     expect(screen.getByRole('list').querySelectorAll('li')).toHaveLength(4)
-    await userEvent.click(screen.getByRole('button', { name: /Get started free/i }))
-    expect(onGetStarted).toHaveBeenCalledOnce()
+    await userEvent.click(screen.getByRole('button', { name: /Try the live demo/i }))
+    expect(onTryDemo).toHaveBeenCalledOnce()
   })
 
-  it('offers returning users a sign-in route', async () => {
+  it('offers account creation and returning-user sign-in', async () => {
     const onSignIn = vi.fn()
-    render(<Landing onGetStarted={vi.fn()} onSignIn={onSignIn} />)
+    const onGetStarted = vi.fn()
+    render(<Landing onGetStarted={onGetStarted} onSignIn={onSignIn} onTryDemo={vi.fn()} />)
+    await userEvent.click(screen.getByRole('button', { name: /Create my account/i }))
+    expect(onGetStarted).toHaveBeenCalledOnce()
     await userEvent.click(screen.getByRole('button', { name: /^Sign in/i }))
     expect(onSignIn).toHaveBeenCalledOnce()
   })

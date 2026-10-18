@@ -11,6 +11,11 @@ function TestDashboard() {
   return <App plan={plan} setPlan={setPlan} user={{ email: 'owner@example.com' }} onSignOut={() => {}} saveState="Saved" />
 }
 
+function TestDemo() {
+  const [plan, setPlan] = useState(() => structuredClone(seed))
+  return <App plan={plan} setPlan={setPlan} user={{ email: 'Sample demo' }} onSignOut={() => {}} saveState="Demo · not saved" isDemo />
+}
+
 beforeEach(() => vi.stubGlobal('scrollTo', vi.fn()))
 afterEach(() => { cleanup(); vi.unstubAllGlobals() })
 
@@ -84,5 +89,21 @@ describe('connected dashboard actions', () => {
     expect(screen.getByText('Start with the cash you have today.')).toBeTruthy()
     await user.click(screen.getByRole('button', { name: 'Borrowing check' }))
     expect(screen.getByText('There is no borrowing answer yet.')).toBeTruthy()
+  })
+})
+
+describe('account-free sample walkthrough', () => {
+  it('turns a payment delay into a visible safety gap and borrowing decision', async () => {
+    const user = userEvent.setup()
+    render(<TestDemo />)
+    const story = document.querySelector('.demo-impact')
+    expect(story.textContent).toContain('$7,700')
+    expect(story.textContent).toContain('Click below to find out')
+    await user.click(screen.getByRole('button', { name: /Delay Atlas payment/i }))
+    expect(story.textContent).toContain('$3,700')
+    expect(story.textContent).toContain('$1,300')
+    await user.click(screen.getByRole('button', { name: /See borrowing decision/i }))
+    expect(document.querySelector('.decision-stat').textContent).toContain('$1,300')
+    expect(screen.getByText('Demo · not saved')).toBeTruthy()
   })
 })
