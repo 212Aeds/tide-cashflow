@@ -43,3 +43,34 @@
 .save-state{font-size:11px;color:#765c47;white-space:nowrap}
 .sync-banner{position:fixed;z-index:50;top:10px;left:50%;transform:translateX(-50%);max-width:min(92vw,600px);background:#fff2df;border:1px solid #d8aa78;color:#6b4329;border-radius:9px;padding:10px 14px;font-size:12px;line-height:1.45;box-shadow:0 8px 25px #5d391720}
 @media(max-width:680px){.auth-card{padding:25px}.auth-links{display:grid}.save-state{font-size:10px}}
+
+/* Guided first-use path */
+.nav-item .nav-step{flex:0 0 22px;display:grid;place-items:center;width:22px;height:22px;border:1px solid #c7a987;border-radius:50%;font-size:10px;font-weight:800;color:#7b563d}
+.nav-item.active .nav-step{background:#8e5437;border-color:#8e5437;color:#fff8ee}
+.start-guide{background:#fffaf1;border:1px solid #d9c3a7;border-radius:14px;padding:24px;margin-bottom:16px}
+.start-guide-heading{display:flex;justify-content:space-between;align-items:flex-start;gap:18px;margin-bottom:20px}
+.start-guide-heading h2{font:800 22px/1.25 Manrope,sans-serif;letter-spacing:-.6px;color:#3d2c20;margin:7px 0}
+.start-guide-heading p{margin:0;color:#715a47;font-size:13px;line-height:1.5}
+.guide-time{white-space:nowrap;background:#f0e0cb;border:1px solid #dfc4a1;border-radius:99px;padding:7px 10px;color:#76523b;font-size:11px;font-weight:800}
+.start-steps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.guide-step{display:flex;flex-direction:column;align-items:flex-start;background:#f7ecdb;border:1px solid #e6d4bb;border-radius:10px;padding:17px;min-height:200px}
+.guide-number{display:grid;place-items:center;width:28px;height:28px;background:#a26443;color:white;border-radius:50%;font:800 12px Manrope,sans-serif;margin-bottom:14px}
+.guide-step h3{font:800 14px/1.3 Manrope,sans-serif;color:#3d2c20;margin:0 0 7px}
+.guide-step p{color:#6c5543;font-size:12px;line-height:1.5;margin:0 0 14px}
+.guide-step button{display:flex;align-items:center;gap:6px;margin-top:auto;border:0;background:none;color:#844b31;font-size:12px;font-weight:800;padding:4px 0;text-align:left}
+.guide-step button:hover,.stage-tip button:hover,.sample-notice button:hover{text-decoration:underline}
+.sample-notice{display:flex;justify-content:space-between;align-items:center;gap:20px;background:#f2e3cd;border:1px solid #ddc29f;border-radius:10px;padding:14px 18px;margin-bottom:16px;color:#5a4230}
+.sample-notice>div{display:grid;gap:3px}.sample-notice strong{font-size:13px}.sample-notice span{font-size:12px;line-height:1.4}
+.sample-notice button{display:flex;align-items:center;gap:7px;white-space:nowrap;border:0;background:transparent;color:#85492c;font-size:12px;font-weight:800}
+.stage-tip{display:flex;align-items:center;gap:16px;background:#eee0cd;border:1px solid #dfc5a4;border-radius:10px;padding:15px 18px;margin:-8px 0 21px}
+.stage-number{flex:none;color:#884f32;background:#fff8ec;border-radius:5px;padding:7px 8px;font-size:10px;font-weight:800;letter-spacing:.8px}
+.stage-tip>div{flex:1}.stage-tip strong{color:#3e2d21;font-size:13px}.stage-tip p{color:#6b5543;font-size:12px;line-height:1.45;margin:3px 0 0}
+.stage-tip button{display:flex;align-items:center;gap:6px;flex:none;border:0;background:transparent;color:#854b31;font-size:12px;font-weight:800;text-align:left}
+.empty-plan-card{display:flex;align-items:center;gap:20px;background:#fffaf1;border:1px solid #dec6a8;border-radius:13px;padding:30px;margin:14px 0 24px}
+.empty-plan-icon{flex:none;display:grid;place-items:center;width:54px;height:54px;background:#f2dec4;color:#945838;border-radius:12px}
+.empty-plan-card>div:nth-child(2){flex:1}.empty-plan-card h2{font:800 21px Manrope,sans-serif;color:#3d2c20;margin:6px 0}.empty-plan-card p{font-size:13px;line-height:1.5;color:#725b48;margin:0}
+.empty-plan-card .primary-button{flex:none}.empty-table{padding:28px!important;color:#745c48;font-size:13px;text-align:center}
+.invoice-empty{color:#745c48;font-size:12px;line-height:1.5;margin:4px 0 12px}
+.sample-reset{display:flex;align-items:center;gap:7px;border:1px solid #dcc5a7;border-radius:7px;background:#fff9ef;color:#744c34;padding:7px 10px;font-size:11px;font-weight:800;white-space:nowrap}.sample-reset:hover{background:#f1dfc9}
+@media(max-width:1100px){.start-steps{grid-template-columns:repeat(2,minmax(0,1fr))}.guide-step{min-height:175px}}
+@media(max-width:680px){.start-guide{padding:18px}.start-guide-heading,.sample-notice,.stage-tip,.empty-plan-card{flex-direction:column;align-items:stretch}.guide-time{align-self:flex-start}.start-steps{grid-template-columns:1fr}.guide-step{min-height:0}.stage-tip{margin-top:0}.stage-number{align-self:flex-start}.sample-notice button,.stage-tip button{padding:4px 0}.empty-plan-card{padding:20px}.empty-plan-card .primary-button{justify-content:center}.sample-reset span{display:none}.sample-reset{padding:7px}}

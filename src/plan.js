@@ -14,6 +14,31 @@ export const seed = {
   ],
 }
 
+export const blankPlan = {
+  opening: 0,
+  buffer: 5000,
+  weeklyIncome: [0, 0, 0, 0, 0, 0],
+  weeklyBills: [0, 0, 0, 0, 0, 0],
+  extraBills: [],
+  invoices: [],
+}
+
+export function isBlankPlan(plan) {
+  return Number(plan.opening) === 0 && plan.invoices.length === 0 &&
+    plan.weeklyIncome.every(value => Number(value) === 0) &&
+    plan.weeklyBills.every(value => Number(value) === 0) &&
+    (plan.extraBills || []).length === 0
+}
+
+export function isSamplePlan(plan) {
+  return plan.invoices.length === seed.invoices.length &&
+    plan.invoices.every((invoice, index) => invoice.id === seed.invoices[index].id && invoice.amount === seed.invoices[index].amount) &&
+    Number(plan.opening) === seed.opening && Number(plan.buffer) === seed.buffer &&
+    plan.weeklyIncome.every((value, index) => Number(value) === seed.weeklyIncome[index]) &&
+    plan.weeklyBills.every((value, index) => Number(value) === seed.weeklyBills[index]) &&
+    (plan.extraBills || []).length === 0
+}
+
 export function forecast(plan) {
   let balance = Number(plan.opening) || 0
   return weeks.map((label, index) => {
@@ -41,6 +66,16 @@ export function setInvoiceStatus(plan, id, status) {
       const { lateWeek, ...rest } = item
       return status === 'late' ? { ...rest, status, lateWeek: Math.min(item.week + 2, 5) } : { ...rest, status }
     }),
+  }
+}
+
+export function removeInvoice(plan, id) {
+  const invoice = plan.invoices.find(item => item.id === id)
+  if (!invoice) return plan
+  return {
+    ...plan,
+    opening: invoice.status === 'paid' ? Number(plan.opening) - Number(invoice.amount) : plan.opening,
+    invoices: plan.invoices.filter(item => item.id !== id),
   }
 }
 

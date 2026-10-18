@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { calculateLoan, forecast, getPlanSummary, seed, setInvoiceStatus, weeks } from './plan.js'
+import { blankPlan, calculateLoan, forecast, getPlanSummary, isBlankPlan, isSamplePlan, removeInvoice, seed, setInvoiceStatus, weeks } from './plan.js'
 
 describe('six-week money plan', () => {
   it('starts the sample with bills covered every week', () => {
@@ -45,6 +45,23 @@ describe('six-week money plan', () => {
     expect(points[0].balance).toBe(17900)
     expect(points[1].invoiceIncome).toBe(0)
     expect(setInvoiceStatus(paid, 2, 'expected').opening).toBe(8000)
+  })
+
+  it('removes a paid invoice from starting cash as well as the list', () => {
+    const paid = setInvoiceStatus(seed, 2, 'paid')
+    const removed = removeInvoice(paid, 2)
+    expect(removed.opening).toBe(seed.opening)
+    expect(removed.invoices.find(item => item.id === 2)).toBeUndefined()
+    expect(removeInvoice(seed, 1).opening).toBe(seed.opening)
+  })
+
+  it('offers a genuinely empty plan when replacing the sample', () => {
+    expect(isBlankPlan(blankPlan)).toBe(true)
+    expect(isBlankPlan(seed)).toBe(false)
+    expect(isSamplePlan(seed)).toBe(true)
+    expect(isSamplePlan(setInvoiceStatus(seed, 2, 'late'))).toBe(true)
+    expect(isSamplePlan({ ...seed, opening: 9000 })).toBe(false)
+    expect(forecast(blankPlan).every(point => point.balance === 0)).toBe(true)
   })
 })
 
