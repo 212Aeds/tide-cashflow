@@ -14,6 +14,7 @@ describe('public welcome page', () => {
     expect(screen.getByRole('heading', { name: /Know if you can cover your bills/i })).toBeTruthy()
     expect(screen.getByText('Handle late invoices')).toBeTruthy()
     expect(screen.getByText('Decide whether to borrow')).toBeTruthy()
+    expect(screen.getByRole('list').querySelectorAll('li')).toHaveLength(4)
     await userEvent.click(screen.getByRole('button', { name: /Get started free/i }))
     expect(onGetStarted).toHaveBeenCalledOnce()
   })

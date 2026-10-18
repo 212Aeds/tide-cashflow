@@ -62,6 +62,12 @@
 @media(max-width:600px){.landing-header{width:calc(100% - 36px);height:72px}.landing-hero{width:calc(100% - 36px);margin:28px auto 64px}.landing-hero h1{font-size:clamp(39px,11vw,55px);margin:16px 0}.landing-hero-copy>p{font-size:15px}.landing-preview{padding:20px}.landing-preview-main{padding:30px 0 23px}.landing-how{padding:56px 18px}.landing-steps{grid-template-columns:1fr;gap:10px;margin-top:25px}.landing-step{min-height:0;padding:20px}.landing-step h3{margin-top:18px}.landing-bottom-cta{align-items:stretch;flex-direction:column;padding:23px}.landing-footer{width:calc(100% - 36px);flex-direction:column;gap:8px}}
 
 /* Guided first-use path */
+/* The four steps form one continuous panel. */
+.landing-steps{gap:0;padding:0;list-style:none;background:#fff9ef;border:1px solid #dfc8a9;border-radius:15px;overflow:hidden;box-shadow:0 8px 24px #8c623112}
+.landing-step{background:transparent;border:0;border-radius:0;min-height:0;padding:26px 23px}
+.landing-step:not(:last-child){border-right:1px solid #e4d3ba}
+@media(max-width:850px){.landing-steps{grid-template-columns:1fr}.landing-step{display:grid;grid-template-columns:42px 1fr;column-gap:16px;align-items:start;padding:22px}.landing-step:not(:last-child){border-right:0;border-bottom:1px solid #e4d3ba}.landing-step-top{grid-row:1/3;display:grid;justify-items:center;gap:9px}.landing-step h3{margin:0 0 6px}.landing-step p{grid-column:2}}
+@media(max-width:600px){.landing-step{padding:19px 16px}}
 .nav-item .nav-step{flex:0 0 22px;display:grid;place-items:center;width:22px;height:22px;border:1px solid #c7a987;border-radius:50%;font-size:10px;font-weight:800;color:#7b563d}
 .nav-item.active .nav-step{background:#8e5437;border-color:#8e5437;color:#fff8ee}
 .start-guide{background:#fffaf1;border:1px solid #d9c3a7;border-radius:14px;padding:24px;margin-bottom:16px}

@@ -40,7 +40,7 @@ export default function Landing({ onGetStarted, onSignIn }) {
 
       <section className="landing-how" id="how-it-works" aria-labelledby="landing-how-title">
         <div className="landing-section-heading"><span className="landing-eyebrow">ONE CONNECTED WORKFLOW</span><h2 id="landing-how-title">From a late payment to a clear next step.</h2><p>Each step uses what you entered before it, so your decision reflects your actual plan.</p></div>
-        <div className="landing-steps">{steps.map(({ icon: Icon, title, description }, index) => <article className="landing-step" key={title}><div className="landing-step-top"><span>{String(index + 1).padStart(2, '0')}</span><Icon size={22} aria-hidden="true" /></div><h3>{title}</h3><p>{description}</p></article>)}</div>
+        <ol className="landing-steps">{steps.map(({ icon: Icon, title, description }, index) => <li className="landing-step" key={title}><div className="landing-step-top"><span>{String(index + 1).padStart(2, '0')}</span><Icon size={22} aria-hidden="true" /></div><h3>{title}</h3><p>{description}</p></li>)}</ol>
         <div className="landing-bottom-cta"><div><strong>Ready to see your own numbers?</strong><span>Create an account to save your plan and return to it later.</span></div><button type="button" className="landing-primary" onClick={onGetStarted}>Create my plan <ArrowRight size={18} aria-hidden="true" /></button></div>
       </section>
     </main>
