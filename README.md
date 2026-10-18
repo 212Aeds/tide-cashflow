@@ -2,9 +2,11 @@
 
 **TrojanHacks 2026 · Finance vertical**
 
+**Team:** Aeden Gray and Stavya Palassery
+
 Tide helps freelancers with irregular client income answer a specific question: **If an invoice arrives late, can I still pay my bills, and do I need to borrow?**
 
-[Try the live demo without an account](https://tide-36b83.web.app/?demo=1) · [Open the public site](https://tide-36b83.web.app/)
+[Try the live demo without an account](https://tide-36b83.web.app/?demo=1) · [Open the public site](https://tide-36b83.web.app/) · [Judge presentation](https://docs.google.com/presentation/d/1Ei81xYIQAvsQOQgqsvGr2yUGeKmQZ4CG_t2jtDZReuE)
 
 ## The 60-second walkthrough
 
