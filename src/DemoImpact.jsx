@@ -15,8 +15,8 @@ export default function DemoImpact({ plan, invoice, onToggleDelay, onOpenBorrowi
 
   return <section className={`demo-impact ${delayed ? 'demo-impact-active' : ''}`} aria-labelledby="demo-impact-title">
     <div className="demo-impact-heading">
-      <div><span className="demo-impact-kicker"><span className="demo-live-dot" /> LIVE DEMO · SAMPLE DATA</span><h2 id="demo-impact-title">One late payment changes the answer.</h2><p>Atlas Commerce owes {money(invoice.amount)}. Move its payment two weeks later and watch Tide recalculate the cash you have after bills.</p></div>
-      <div className="demo-impact-control"><span className="demo-impact-time">60-second story</span><button type="button" className="demo-impact-primary" onClick={onToggleDelay}>{delayed ? <RotateCcw size={17}/> : <FileClock size={17}/>} {delayed ? 'Restore on-time payment' : 'Delay Atlas payment'}</button></div>
+      <div><span className="demo-impact-kicker"><span className="demo-live-dot" /> ATLAS COMMERCE · SAMPLE INVOICE</span><h2 id="demo-impact-title">What if $6,200 arrives two weeks late?</h2><p>Move the Atlas payment and see which week gets tight. The borrowing check uses the same updated numbers.</p></div>
+      <div className="demo-impact-control"><button type="button" className="demo-impact-primary" onClick={onToggleDelay}>{delayed ? <RotateCcw size={17}/> : <FileClock size={17}/>} {delayed ? 'Restore on-time payment' : 'Delay Atlas payment'}</button></div>
     </div>
     <div className="demo-impact-comparison" aria-live="polite">
       <div className="demo-impact-number"><span>IF PAID ON TIME</span><strong>{money(onTime.lowest)}</strong><small>Lowest cash after bills</small></div>
@@ -24,7 +24,7 @@ export default function DemoImpact({ plan, invoice, onToggleDelay, onOpenBorrowi
       <div className="demo-impact-number"><span>IF PAID LATE</span><strong className={delayed ? 'demo-impact-warn' : ''}>{delayed ? money(late.lowest) : '—'}</strong><small>{delayed ? 'Lowest cash after bills' : 'Click below to find out'}</small></div>
       <div className="demo-impact-number demo-impact-gap"><span>GAP TO YOUR SAFETY AMOUNT</span><strong className={delayed ? 'demo-impact-warn' : ''}>{delayed ? money(late.bufferGap) : '—'}</strong><small>{delayed ? `To keep ${money(late.buffer)} aside` : 'Calculated from the forecast'}</small></div>
     </div>
-    {delayed && <p className="demo-impact-explanation" role="status">The lowest projected balance falls by {money(onTime.lowest - late.lowest)}. {late.shortfall ? `The plan is ${money(late.shortfall)} short for bills.` : late.bufferGap ? `Bills are covered, but the plan drops ${money(late.bufferGap)} below your safety amount.` : 'Bills and your safety amount remain covered.'} Open the borrowing check to see the decision and example cost.</p>}
+    {delayed && <p className="demo-impact-explanation" role="status">At the tightest point, you would have {money(onTime.lowest - late.lowest)} less cash. {late.shortfall ? `That leaves ${money(late.shortfall)} of bills uncovered.` : late.bufferGap ? `You can still pay the bills, but you would be ${money(late.bufferGap)} below the amount you wanted to keep aside.` : 'Your bills and safety amount are still covered.'} Check the borrowing screen before deciding what to do.</p>}
     {delayed && <div className="demo-impact-actions"><button type="button" className="demo-impact-secondary" onClick={onOpenBorrowing}>See borrowing decision <ArrowRight size={16}/></button><button type="button" className="demo-impact-secondary" onClick={onWriteReminder}>Draft reminder <ArrowRight size={16}/></button></div>}
     <ScenarioChart onTimePoints={onTimePoints} latePoints={latePoints} buffer={late.buffer} delayed={delayed} />
   </section>
