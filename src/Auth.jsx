@@ -17,7 +17,7 @@ function messageFor(error) {
   if (code === 'auth/popup-blocked') return 'Your browser blocked the Google sign-in window. Allow pop-ups and try again.'
   if (code === 'auth/popup-closed-by-user') return 'Google sign-in was closed. You can try again.'
   if (code === 'auth/account-exists-with-different-credential') return 'An account with this email already uses another sign-in method. Sign in with that method first.'
-  if (code === 'permission-denied') return 'Your plan could not be saved. Check the Firestore rules for this project.'
+  if (code === 'permission-denied' || error?.message?.includes('Cloud Firestore API')) return 'Online saving is not ready yet.'
   return error?.message || 'Something went wrong. Please try again.'
 }
 
@@ -74,7 +74,7 @@ function SignIn() {
     </form>
     {mode !== 'reset' && <><div className="auth-divider"><span>or</span></div><button type="button" className="google-button" onClick={googleSignIn} disabled={busy}><span className="google-g" aria-hidden="true">G</span> Continue with Google</button></>}
     <div className="auth-links">{mode !== 'reset' && <button type="button" onClick={()=>{setMode(mode === 'signup' ? 'signin' : 'signup');setNotice('')}}>{mode === 'signup' ? 'Already have an account? Sign in' : 'New here? Create an account'}</button>}<button type="button" onClick={()=>{setMode(mode === 'reset' ? 'signin' : 'reset');setNotice('')}}>{mode === 'reset' ? 'Back to sign in' : 'Forgot password?'}</button></div>
-    <div className="auth-foot"><ShieldCheck size={16}/> Your plan is saved to your account.</div>
+    <div className="auth-foot"><ShieldCheck size={16}/> Changes to your plan save automatically.</div>
   </div></div>
 }
 
@@ -120,12 +120,12 @@ export default function AuthGate() {
       if (cached && Array.isArray(cached.invoices) && Array.isArray(cached.weeklyBills)) {
         planRef.current = cached
         setPlan(cached)
-        setLoadError(`Cloud sync is unavailable: ${messageFor(error)} Changes will stay on this device until saving works.`)
+        setLoadError(`${messageFor(error)} Changes will stay on this device until online saving works.`)
         setSaveState('Saved on this device')
       } else {
         planRef.current = seed
         setPlan(seed)
-        setLoadError(`Cloud sync is unavailable: ${messageFor(error)} You can use the sample plan on this device, but changes will not sync until Firestore is ready.`)
+        setLoadError(`${messageFor(error)} You can use the sample plan here, but changes will stay on this device.`)
         setSaveState('Saved on this device')
       }
     })
@@ -145,7 +145,7 @@ export default function AuthGate() {
         setLoadError('')
       } catch (error) {
         setSaveState('Saved on this device')
-        setLoadError(`Cloud sync is unavailable: ${messageFor(error)} Changes are saved on this device.`)
+        setLoadError(`${messageFor(error)} Changes are saved on this device.`)
       }
     }, 500)
     return () => clearTimeout(saveTimer.current)
