@@ -1,39 +1,64 @@
-# Tide — a cash decision tool for freelancers
+# Tide
 
-**Finance vertical · TrojanHacks 2026**
+**TrojanHacks 2026 · Finance vertical**
 
-Tide helps a freelancer answer one concrete question: **Can I cover my bills if a client pays late, and is borrowing necessary?** Enter starting cash, expected client payments, weekly bills, and a safety amount. A payment delay changes the six-week cash forecast, which changes the borrowing gap and example loan cost.
+Tide helps freelancers with irregular client income answer a specific question: **If an invoice arrives late, can I still pay my bills, and do I need to borrow?**
 
-## Try the working demo
+[Try the live demo without an account](https://tide-36b83.web.app/?demo=1) · [Open the public site](https://tide-36b83.web.app/)
 
-- Live site: https://tide-36b83.web.app/
-- Direct sample walkthrough: https://tide-36b83.web.app/?demo=1
-- Choose **Delay Atlas payment**. The sample's lowest projected cash changes from **$7,700** to **$3,700**, creating a **$1,300 gap** below its $5,000 safety amount. Open **See borrowing decision** to see that gap carried into the loan calculator.
+## The 60-second walkthrough
 
-The sample walkthrough requires no account and does not save changes. **Restart demo** restores the sample. For a private, persistent plan, use email/password or Google sign-in. Each account's plan is saved under its Firebase UID in Cloud Firestore.
+1. Open the live demo. The sample plan starts with a **$7,700** lowest projected balance after bills and a **$5,000** safety amount.
+2. Click **Delay Atlas payment**. Tide moves a **$6,200** client invoice two weeks later and redraws the six-week cash comparison. The lowest projected balance falls to **$3,700**.
+3. Click **See borrowing decision**. Bills still have a **$0 shortfall**, while the plan is **$1,300 below the chosen safety amount**. The loan calculator starts at that gap and shows example repayment and interest costs.
+4. Return to **Client payments** to draft a friendly reminder that can be copied into email. Tide does not send it automatically.
 
-## How it works
+The guest demo uses sample data and does not save changes. Email/password and Google sign-in are available for a private plan saved to Cloud Firestore.
 
-1. `forecast()` in `src/plan.js` adds expected income and invoice receipts, subtracts bills, and carries the balance forward week by week.
-2. `setInvoiceStatus()` moves delayed payments to their updated expected week. The same plan is used throughout the dashboard.
-3. `getPlanSummary()` finds the lowest balance, any bill shortfall, and the gap below the user's chosen safety amount.
-4. `calculateLoan()` shows example monthly payment, total repayment, and interest for an amount, APR, and term chosen by the user.
+## Why the parts belong together
 
-The app does **not** connect to banks, send reminders automatically, offer loans, or give a lender quote. A reminder can be copied into the user's own email. Loan figures omit lender-specific fees and are examples for comparison.
+```mermaid
+flowchart LR
+    A[Expected income and bills] --> B[Client payment timing]
+    B --> C[Six-week cash forecast]
+    C --> D[Bills shortfall and safety gap]
+    D --> E[Example borrowing cost]
+```
 
-## Build and test
+The app keeps one plan object. `setInvoiceStatus()` changes when a receipt arrives; `forecast()` carries cash forward after income and bills; `getPlanSummary()` identifies the lowest balance and gaps; `calculateLoan()` estimates repayment for an amount, APR, and term. Changing an upstream input changes the later answer.
 
-React, Vite, Tailwind CSS, Firebase Authentication, and Cloud Firestore.
+## What works today
+
+- Add and update expected client payments and bills.
+- Mark an invoice late or paid, change its expected week, and copy a reminder draft.
+- Edit starting cash, other income, weekly bills, the plan start date, and the safety amount.
+- See weekly cash balances and compare a sample invoice on time versus delayed.
+- Compare a loan amount, APR, term, monthly payment, total repayment, and interest.
+- Sign in with Firebase Authentication and save a private plan in Firestore. Offline changes remain in a browser cache until online saving works.
+- Use the responsive guest demo on desktop or mobile. Motion respects the device's reduced-motion setting.
+
+Tide is a hackathon prototype. It does not connect to banks, predict actual payment dates, send payments or reminders, offer loans, or include lender-specific fees in its example loan figures. It has not been tested for measured user impact.
+
+## Tech stack
+
+React 19, Vite 7, Tailwind CSS 4, Firebase Authentication, Cloud Firestore, and Vitest. Firebase Hosting serves the public site.
+
+## Run locally
 
 ```bash
-npm install
+npm ci
 npm test
 npm run dev
 npm run build
 ```
 
-Tests cover payment timing, cash forecasting, safety gaps, loan math, the dashboard workflow, and the sample walkthrough.
+The web app config for the hackathon Firebase project is in `src/firebase.js`. To use another Firebase project, copy `.env.example` to `.env.local` and set the four `VITE_FIREBASE_*` values. Enable Email/Password and Google sign-in, authorize your hosting domain, create Firestore, and publish `firestore.rules`. Those rules restrict each `users/{uid}` document to its owner. Never add a service-account key to client code.
 
-## Firebase setup
+## Repository map
 
-The public web app configuration for `tide-36b83` is in `src/firebase.js`. For another project, copy `.env.example` to `.env.local` and set the four `VITE_FIREBASE_*` values. Enable **Email/Password** and **Google** under Authentication, authorize the hosting domain, create Firestore, and publish `firestore.rules`. Each signed-in user can access only their own `users/{uid}` document. Do not place a service-account key in client code.
+- `src/plan.js` — forecasting and loan math
+- `src/DemoImpact.jsx` — interactive comparison driven by the same plan
+- `src/App.jsx` — the four-step workspace
+- `src/Auth.jsx` — Firebase sign-in and plan persistence
+- `firestore.rules` — owner-only Firestore access
+- `src/*.test.*` — math, persistence, and workflow checks
