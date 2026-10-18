@@ -2,7 +2,8 @@ import React, { useEffect, useRef, useState } from 'react'
 import { createUserWithEmailAndPassword, GoogleAuthProvider, onAuthStateChanged, sendPasswordResetEmail, signInWithEmailAndPassword, signInWithPopup, signOut } from 'firebase/auth'
 import { doc, getDoc, serverTimestamp, setDoc } from 'firebase/firestore'
 import { ArrowRight, LockKeyhole, Mail, ShieldCheck } from 'lucide-react'
-import App, { seed } from './App.jsx'
+import App from './App.jsx'
+import { seed } from './plan.js'
 import { auth, configured, db } from './firebase.js'
 
 function messageFor(error) {
