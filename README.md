@@ -56,6 +56,8 @@ npm run build
 
 The web app config for the hackathon Firebase project is in `src/firebase.js`. To use another Firebase project, copy `.env.example` to `.env.local` and set the four `VITE_FIREBASE_*` values. Enable Email/Password and Google sign-in, authorize your hosting domain, create Firestore, and publish `firestore.rules`. Those rules restrict each `users/{uid}` document to its owner. Never add a service-account key to client code.
 
+`firebase.json` contains the Hosting rewrite needed for direct demo links. After building, a project owner can deploy with `firebase deploy --only hosting --project tide-36b83`.
+
 ## Repository map
 
 - `src/plan.js` — forecasting and loan math
